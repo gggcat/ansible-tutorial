@@ -1,4 +1,4 @@
-version: '3'
+version: '3.5'
 
 services:
   tutorial:
@@ -9,3 +9,18 @@ services:
     command: /bin/bash
     volumes:
         - .:/work
+    environment:
+      ANSIBLE_CONFIG: .
+      ANSIBLE_USERNAME: ${ANSIBLE_USERNAME}
+      ANSIBLE_PASSWORD: ${ANSIBLE_PASSWORD}
+      USERNAME: ${USERNAME}
+      SSHD_PORT: ${SSHD_PORT}
+    secrets:
+      - secret_key
+      - public_key
+
+secrets:
+  secret_key:
+    file: ./.ssh/ubuntu.key
+  public_key:
+    file: ./.ssh/ubuntu.key.pub

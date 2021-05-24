@@ -1,0 +1,50 @@
+---
+- hosts: init
+
+  vars:
+    - ansible_user_name: "{{ lookup('env', 'ANSIBLE_USERNAME') }}"
+    - ansible_user_password: "{{ lookup('env', 'ANSIBLE_PASSWORD') }}"
+    - sshd_port: "{{ lookup('env', 'SSHD_PORT') }}"
+  gather_facts: no
+  become: true
+
+  tasks:
+    - name: Add a new user named ansible_user_name
+      user:
+        name: "{{ ansible_user_name }}"
+        shell: /bin/bash
+        password: "{{ ansible_user_password }}"
+    
+    - name: Add ansible user to the sudoers
+      copy:
+        dest: "/etc/sudoers.d/{{ ansible_user_name }}"
+        content: "{{ ansible_user_name }}  ALL=(ALL)  NOPASSWD: ALL"
+    
+    - name: Deploy SSH Key
+      authorized_key:
+        user: "{{ ansible_user_name }}"
+        key: "{{ lookup('file', '/root/.ssh/id_rsa.pub') }}"
+        state: present
+
+    - name: Change port to {{ sshd_port }}
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        regexp: "^Port"
+        insertafter: "^#Port"
+        line: "Port {{ sshd_port }}"
+
+    - name: Disable Root Login
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        regexp: "^PermitRootLogin"
+        line: "PermitRootLogin no"
+        state: present
+        backup: yes
+      notify:
+        - restart sshd
+
+  handlers:
+    - name: restart sshd
+      service:
+        name: sshd
+        state: restarted

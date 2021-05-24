@@ -1,0 +1,23 @@
+---
+- hosts: ubuntu
+
+  vars:
+    - sshd_port: "{{ lookup('env', 'SSHD_PORT') }}"
+  gather_facts: no
+  become: true
+
+  tasks:
+    - name: Deny all access from any
+      ufw:
+        default: deny
+        direction: incoming
+
+    - name: Allow all access to port {{ sshd_port }} (SSH)
+      ufw:
+        rule: allow
+        proto: tcp
+        port: "{{ sshd_port }}"
+
+    - name: Enable firewall
+      ufw:
+        state: enabled

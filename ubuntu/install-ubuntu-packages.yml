@@ -1,0 +1,31 @@
+---
+- hosts: ubuntu
+
+  vars:
+  gather_facts: no
+  become: true
+
+  tasks:
+    - name: Install net-tools
+      apt:
+        update_cache: yes
+        name:
+          - net-tools
+
+    - name: Install curl
+      apt:
+        update_cache: yes
+        name:
+          - curl
+
+    - name: Install tree
+      apt:
+        update_cache: yes
+        name:
+          - tree
+
+    - name: Install htop
+      apt:
+        update_cache: yes
+        name:
+          - htop

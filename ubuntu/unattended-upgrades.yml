@@ -1,0 +1,18 @@
+---
+- hosts: ubuntu
+
+  vars:
+  gather_facts: no
+  become: true
+
+  tasks:
+    - name: Configure debconf
+      debconf: name=unattended-upgrades question=unattended-upgrades/enable_auto_updates vtype=boolean value='true'
+
+    - name: Install unattended-upgrades
+      apt: name=unattended-upgrades
+
+    - name: Configure unattended-upgrades
+      command:
+        cmd: dpkg-reconfigure -f noninteractive unattended-upgrades
+        creates: /etc/apt/apt.conf.d/20auto-upgrades
