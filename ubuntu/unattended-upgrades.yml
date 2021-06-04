@@ -16,3 +16,45 @@
       command:
         cmd: dpkg-reconfigure -f noninteractive unattended-upgrades
         creates: /etc/apt/apt.conf.d/20auto-upgrades
+
+    - name: Enable periodic for download and clean
+      lineinfile:
+        dest: /etc/apt/apt.conf.d/20auto-upgrades
+        line: "{{ item }}"
+      with_items:
+        - 'APT::Periodic::Download-Upgradeable-Packages "1";'
+        - 'APT::Periodic::AutocleanInterval "7";'
+
+    - name: Enable upgrade recommend updates
+      lineinfile:
+        dest: /etc/apt/apt.conf.d/50unattended-upgrades
+        regexp: '^//\t+\"\${distro_id}\:\${distro_codename}-updates\";'
+        line: "\t\"${distro_id}:${distro_codename}-updates\";"
+
+    - name: Enable automatic reboot
+      lineinfile:
+        dest: /etc/apt/apt.conf.d/50unattended-upgrades
+        regexp: '^//Unattended-Upgrade::Automatic-Reboot \"false\";'
+        line: "Unattended-Upgrade::Automatic-Reboot \"true\";"
+
+    - name: Set automatic reboot time
+      lineinfile:
+        dest: /etc/apt/apt.conf.d/50unattended-upgrades
+        regexp: '^//Unattended-Upgrade::Automatic-Reboot-Time \"02:00\";'
+        line: "Unattended-Upgrade::Automatic-Reboot-Time \"04:00\";"
+
+    - name: Enable remove unused kernel packages
+      lineinfile:
+        dest: /etc/apt/apt.conf.d/50unattended-upgrades
+        regexp: '^//Unattended-Upgrade::Remove-Unused-Kernel-Packages \"true\";'
+        line: "Unattended-Upgrade::Remove-Unused-Kernel-Packages \"true\";"
+
+    - name: Enable remove unused dependencies
+      lineinfile:
+        dest: /etc/apt/apt.conf.d/50unattended-upgrades
+        regexp: '^//Unattended-Upgrade::Remove-Unused-Dependencies \"false\";'
+        line: "Unattended-Upgrade::Remove-Unused-Dependencies \"true\";"
+
+    - name: Reboot the machine (Wait for 5 min)
+      reboot:
+        reboot_timeout: 300
